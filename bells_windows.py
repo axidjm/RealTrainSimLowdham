@@ -2,7 +2,7 @@ import winsound
 from time import sleep
 import time
 
-gap_period = 0.25
+gap_period = 0.3
 
 def peg(section, line, state):
     # section 'rear': do nothing
@@ -14,6 +14,8 @@ def peg(section, line, state):
 
     if section == "advance":
         print(f"Pegging {state} on {line} (in {section})")
+    else:
+        print(f"Signalman should peg {state} on {line} (in {section})")
 
 
 def up_bell():

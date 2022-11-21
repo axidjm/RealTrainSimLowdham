@@ -16,7 +16,7 @@ import stomp
 # windows
 from bells_windows import bell_tapper, up_bell, down_bell, peg
 
-pause_period = 0.4
+pause_period = 0.5
 pause2_period = 1.0
 long_period = 2.5
 
@@ -64,7 +64,7 @@ def print_td_frame(parsed_body):
                         case '4062':
                             print (f"{uk_datetime} Up train {description} near Bleasby")
                             TrainEnteringSection("rear", "UP", description)
-                            pause2()
+                            long_pause()
                             IsLineClear("advance", "UP", description)
                         case '4050':
                             print (f"{uk_datetime} Up train {description} near Lowdham")
@@ -83,7 +83,7 @@ def print_td_frame(parsed_body):
                         case '4043':
                             print (f"{uk_datetime} Down train {description} near Burton Joyce")
                             TrainEnteringSection("rear", "DOWN", description)
-                            pause2()
+                            long_pause()
                             IsLineClear("advance", "DOWN", description)
                         case '4051':
                             print (f"{uk_datetime} Down train {description} near Lowdham")
@@ -114,7 +114,11 @@ def IsLineClear(section, line, description):
 
     # Line is UP or DOWN
 
-    CallAttention(section, line)
+    print(f"Call Attention on {line} (in {section})")
+    ding(section, line)
+    long_pause()
+    tap(section, line)
+    pause2()
     print(f"Is Line Clear for {description} on {line} (in {section})", end='')
 
     match trainClass:
@@ -192,9 +196,11 @@ def TrainEnteringSection(section, line, description):
 
     print(f"Train {description} Entering Section (2) on {line} (in {section})")
     ding(section, line)
+    time.sleep(0.2)         # Don't know why the pause in the 'ding()' isn't enough...
     ding(section, line)
     long_pause()
     tap(section, line)
+    time.sleep(0.2)         # Don't know why the pause in the 'ding()' isn't enough...
     tap(section, line)
     pause2()
     peg(section, line, 'TOL')
@@ -205,27 +211,25 @@ def TrainOutOfSection(section, line, description):
 
     # Line is UP or DOWN
 
-    CallAttention(section, line)
-
-    print(f"Train {description} Out Of Section (2-1) on {line} (in {section})")
-    ding(section, line)
-    ding(section, line)
-    pause()
+    print(f"Call Attention on {line} (in {section})")
+    tap(section, line)
+    long_pause()
     ding(section, line)
     pause2()
+    
+    print(f"Train {description} Out Of Section (2-1) on {line} (in {section})")
     tap(section, line)
     tap(section, line)
     pause()
     tap(section, line)
+    pause2()
+    ding(section, line)
+    ding(section, line)
+    pause()
+    ding(section, line)
     pause2()
     peg(section, line, 'NORMAL')
 
-def CallAttention(section, line):
-    print(f"Call Attention on {line} (in {section})")
-    ding(section, line)
-    long_pause()
-    tap(section, line)
-    pause2()
 
 def ding(section, line):
     # section 'rear': Ring the bell
@@ -265,6 +269,26 @@ def long_pause():
     # Time for signalman to get to the bell, say 3 seconds
     time.sleep(long_period)
 
+def connect_and_subscribe():
+    # Connect to feed
+    connect_headers = {
+        "username": feed_username,
+        "passcode": feed_password,
+        "wait": True,
+        }
+
+    # Subscription
+    subscribe_headers = {
+        "destination": "/topic/TD_MC_EM_SIG_AREA",
+        "id": 1,
+        "ack": "auto",
+    }
+
+    # print("Attempting connection")
+    connection.connect(**connect_headers)
+    connection.subscribe(**subscribe_headers)
+
+
 class Listener(stomp.ConnectionListener):
     _mq: stomp.Connection
 
@@ -276,7 +300,7 @@ class Listener(stomp.ConnectionListener):
         parsed_body = json.loads(message_raw)
 
         if headers["destination"].startswith("/topic/TRAIN_MVT_"):
-            trust.print_trust_frame(parsed_body)
+            pass
         elif headers["destination"].startswith("/topic/TD_"):
             print_td_frame(parsed_body)
 
@@ -293,28 +317,12 @@ if __name__ == "__main__":
 
     # https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
     # We're committing to sending and accepting heartbeats every 5000ms
-    connection = stomp.Connection([('datafeeds.networkrail.co.uk', 61618)], keepalive=True, heartbeats=(15000, 15000))
+    connection = stomp.Connection([('datafeeds.networkrail.co.uk', 61618)], keepalive=True, heartbeats=(20000, 20000))
     connection.set_listener('', Listener(connection))
-
-    # Connect to feed
-    connect_headers = {
-        "username": feed_username,
-        "passcode": feed_password,
-        "wait": True,
-        }
-
-    # Subscription
-    subscribe_headers = {
-        "destination": "/topic/TD_MC_EM_SIG_AREA",
-        "id": 1,
-        "ack": "auto",
-    }
 
     while 1:
         try:
-            # print("Attempting connection")
-            connection.connect(**connect_headers)
-            connection.subscribe(**subscribe_headers)
+            connect_and_subscribe()
 
             while connection.is_connected():
                 sleep(1)

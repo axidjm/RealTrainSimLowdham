@@ -41,7 +41,8 @@ def peg(section, line, state):
             case "NORMAL":
                 set_output(lc_pin)
                 clr_output(tol_pin)
-
+    else:
+        print(f"Signalman should peg {state} on {line} (in {section})")
 
 def up_bell():
     pulse_output(lh_bj_bell)
