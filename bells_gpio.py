@@ -16,7 +16,37 @@ gap_period = 0.25
 
 def bells_init():
     GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    pulse_output(lh_bj_bell)
+    time.sleep(gap_period)
+    pulse_output(lh_th_bell)
+    time.sleep(1.0)
+    
+    set_output(tap_pin)
+    time.sleep(2.0)
+    clr_output(tap_pin)
+    time.sleep(1.0)
+    
+    set_output(lh_bj_lc)
+    time.sleep(2.0)
+    clr_output(lh_bj_lc)
+    time.sleep(1.0)
 
+    set_output(lh_bj_tol)
+    time.sleep(2.0)
+    clr_output(lh_bj_tol)
+    time.sleep(1.0)
+    
+    set_output(lh_th_lc)
+    time.sleep(2.0)
+    clr_output(lh_th_lc)
+    time.sleep(1.0)
+    
+    set_output(lh_th_tol)
+    time.sleep(2.0)
+    clr_output(lh_th_tol)
+    time.sleep(1.0)
+    
 def peg(section, line, state):
     # section 'rear': do nothing
     # section 'advance: peg up
@@ -43,7 +73,7 @@ def peg(section, line, state):
                 clr_output(lc_pin)
                 set_output(tol_pin)
             case "NORMAL":
-                set_output(lc_pin)
+                clr_output(lc_pin)
                 clr_output(tol_pin)
     else:
         print(f"Signalman should peg {state} on {line} (in {section})")
@@ -65,9 +95,9 @@ def pulse_output(pin):
 
 def set_output(pin):
     GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.HIGH)
+    GPIO.output(pin, GPIO.LOW)
 
 def clr_output(pin):
     GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
+    GPIO.output(pin, GPIO.HIGH)
 

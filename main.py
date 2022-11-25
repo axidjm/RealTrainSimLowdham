@@ -148,6 +148,30 @@ def IsLineClear(section, line, description):
             pause()
             tap(section, line)
 
+        case '3':
+            print(" (3-4-1)")   # RHTT
+            ding(section, line)
+            ding(section, line)
+            ding(section, line)
+            pause()
+            ding(section, line)
+            ding(section, line)
+            ding(section, line)
+            ding(section, line)
+            pause()
+            ding(section, line)
+            pause2()
+            tap(section, line)
+            tap(section, line)
+            tap(section, line)
+            pause()
+            tap(section, line)
+            tap(section, line)
+            tap(section, line)
+            tap(section, line)
+            pause()
+            tap(section, line)
+
         case '5':
             print(" (2-2-1)")
             ding(section, line)
@@ -183,7 +207,7 @@ def IsLineClear(section, line, description):
             tap(section, line)
 
         case _:
-            print(" (unknown class {trainClass})")
+            print(f" (unknown class {trainClass})")
 
     pause2()
     peg(section, line, 'LC')
@@ -320,9 +344,8 @@ if __name__ == "__main__":
     connection = stomp.Connection([('datafeeds.networkrail.co.uk', 61618)], keepalive=True, heartbeats=(20000, 20000))
     connection.set_listener('', Listener(connection))
 
-    bells_init()
     print("Testing")
-    TrainOutOfSection("advance", "UP", "Test")
+    bells_init()
     print("End of test")
 
     while 1:
