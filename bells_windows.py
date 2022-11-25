@@ -4,6 +4,9 @@ import time
 
 gap_period = 0.3
 
+def bells_init():
+    pass
+
 def peg(section, line, state):
     # section 'rear': do nothing
     # section 'advance: peg up

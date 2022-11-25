@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 from time import sleep
+import time
 
 # GPIO pins
 tap_pin=21 # appr_bell/tap
@@ -12,6 +13,9 @@ lh_th_bell=18
 
 pulse_period = 0.15
 gap_period = 0.25
+
+def bells_init():
+    GPIO.setmode(GPIO.BCM)
 
 def peg(section, line, state):
     # section 'rear': do nothing
@@ -51,7 +55,7 @@ def down_bell():
     pulse_output(lh_th_bell)
 
 def bell_tapper():
-    pulse_output(tap)
+    pulse_output(tap_pin)
 
 def pulse_output(pin):
     set_output(pin)

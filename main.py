@@ -11,10 +11,10 @@ import time
 import stomp
 
 # RPi
-# from bells_gpio import bell_tapper, up_bell, down_bell
+# from bells_gpio bells_init, bell_tapper, up_bell, down_bell, peg
 
 # windows
-from bells_windows import bell_tapper, up_bell, down_bell, peg
+from bells_windows import bells_init, bell_tapper, up_bell, down_bell, peg
 
 pause_period = 0.5
 pause2_period = 1.0
@@ -319,6 +319,11 @@ if __name__ == "__main__":
     # We're committing to sending and accepting heartbeats every 5000ms
     connection = stomp.Connection([('datafeeds.networkrail.co.uk', 61618)], keepalive=True, heartbeats=(20000, 20000))
     connection.set_listener('', Listener(connection))
+
+    bells_init()
+    print("Testing")
+    TrainOutOfSection("advance", "UP", "Test")
+    print("End of test")
 
     while 1:
         try:
