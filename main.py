@@ -11,7 +11,7 @@ import time
 import stomp
 
 # RPi
-# from bells_gpio bells_init, bell_tapper, up_bell, down_bell, peg
+# from bells_gpio import bells_init, bell_tapper, up_bell, down_bell, peg
 
 # windows
 from bells_windows import bells_init, bell_tapper, up_bell, down_bell, peg
@@ -122,6 +122,22 @@ def IsLineClear(section, line, description):
     print(f"Is Line Clear for {description} on {line} (in {section})", end='')
 
     match trainClass:
+        case '0':
+            print(" (2-3)")
+            ding(section, line)
+            ding(section, line)
+            pause()
+            ding(section, line)
+            ding(section, line)
+            ding(section, line)
+            pause2()
+            tap(section, line)
+            tap(section, line)
+            pause()
+            tap(section, line)
+            tap(section, line)
+            tap(section, line)
+
         case '1':
             print(" (4)")
             ding(section, line)

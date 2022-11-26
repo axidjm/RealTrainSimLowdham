@@ -4,6 +4,7 @@ import time
 
 # GPIO pins
 tap_pin=21 # appr_bell/tap
+tc4601=20
 lh_bj_bell=16
 lh_bj_lc=12
 lh_bj_tol=25
@@ -21,12 +22,17 @@ def bells_init():
     time.sleep(gap_period)
     pulse_output(lh_th_bell)
     time.sleep(1.0)
-    
+
     set_output(tap_pin)
     time.sleep(2.0)
     clr_output(tap_pin)
     time.sleep(1.0)
-    
+
+    set_output(tc4601)
+    time.sleep(2.0)
+    clr_output(tc4601)
+    time.sleep(1.0)
+
     set_output(lh_bj_lc)
     time.sleep(2.0)
     clr_output(lh_bj_lc)
@@ -36,17 +42,17 @@ def bells_init():
     time.sleep(2.0)
     clr_output(lh_bj_tol)
     time.sleep(1.0)
-    
+
     set_output(lh_th_lc)
     time.sleep(2.0)
     clr_output(lh_th_lc)
     time.sleep(1.0)
-    
+
     set_output(lh_th_tol)
     time.sleep(2.0)
     clr_output(lh_th_tol)
     time.sleep(1.0)
-    
+
 def peg(section, line, state):
     # section 'rear': do nothing
     # section 'advance: peg up

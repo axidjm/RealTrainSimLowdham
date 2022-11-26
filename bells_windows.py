@@ -5,7 +5,6 @@ import time
 gap_period = 0.3
 
 def bells_init():
-    TrainOutOfSection("advance", "UP", "Test")
     pass
 
 def peg(section, line, state):
