@@ -36,5 +36,6 @@ def bell_tapper():
     winsound.PlaySound("tap.wav", winsound.SND_FILENAME|winsound.SND_ASYNC)
     time.sleep(gap_period)
 
-
+def tc4601(state):
+    print(f"Track Circuit {state}")
 

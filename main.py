@@ -5,16 +5,20 @@ import json
 from time import sleep
 from datetime import datetime
 from pytz import timezone
-import time
+import time,os
 
 # Third party
 import stomp
 
 # RPi
-# from bells_gpio import bells_init, bell_tapper, up_bell, down_bell, peg
+if os.name == "posix":
+    print("Importing bells_gpio")
+    from bells_gpio import bells_init, bell_tapper, up_bell, down_bell, peg, tc4601
 
 # windows
-from bells_windows import bells_init, bell_tapper, up_bell, down_bell, peg
+if os.name == "nt":
+    print("Importing bells_windows")
+    from bells_windows import bells_init, bell_tapper, up_bell, down_bell, peg, tc4601
 
 pause_period = 0.5
 pause2_period = 1.0
@@ -68,9 +72,11 @@ def print_td_frame(parsed_body):
                             IsLineClear("advance", "UP", description)
                         case '4050':
                             print (f"{uk_datetime} Up train {description} near Lowdham")
+                            tc4601("OCCUPIED") 
                             TrainEnteringSection("advance", "UP", description)
                             long_pause()
                             TrainOutOfSection("rear", "UP", description)
+                            tc4601("CLEAR") 
                         case '4042':
                             print (f"{uk_datetime} Up train {description} near Burton Joyce")
                             TrainOutOfSection("advance", "UP", description)

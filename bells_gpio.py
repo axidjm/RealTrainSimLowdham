@@ -4,7 +4,7 @@ import time
 
 # GPIO pins
 tap_pin=21 # appr_bell/tap
-tc4601=20
+tc4601_out=20
 lh_bj_bell=16
 lh_bj_lc=12
 lh_bj_tol=25
@@ -28,10 +28,11 @@ def bells_init():
     clr_output(tap_pin)
     time.sleep(1.0)
 
-    set_output(tc4601)
+    tc4601("CLEAR")
     time.sleep(2.0)
-    clr_output(tc4601)
+    tc4601("OCCUPIED")
     time.sleep(1.0)
+    tc4601("CLEAR")      # Leave TC 'clear'
 
     set_output(lh_bj_lc)
     time.sleep(2.0)
@@ -106,4 +107,17 @@ def set_output(pin):
 def clr_output(pin):
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.HIGH)
+
+def tc4601(state):
+    print(f"Track Circuit {state}")
+    match state:
+
+        case "OCCUPIED":
+            clr_output(tc4601_out)
+
+        case "CLEAR":
+            set_output(tc4601_out)
+
+        case _:
+            print("Unknown TC state {state}")
 
