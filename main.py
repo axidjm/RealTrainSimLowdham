@@ -38,7 +38,11 @@ S_SIGNALLING_REFRESH = "SG"           # Signalling refresh
 S_SIGNALLING_REFRESH_FINISHED = "SH"  # Signalling refresh finished
 
 
+message_received = False
+
 def print_td_frame(parsed_body):
+    global message_received
+    
     # Each message in the queue is a JSON array
     for outer_message in parsed_body:
         # Each list element consists of a dict with a single entry - our real target - e.g. {"CA_MSG": {...}}
@@ -46,6 +50,10 @@ def print_td_frame(parsed_body):
 
         message_type = message["msg_type"]
         area_id = message["area_id"]
+
+        if message_received == False:
+            message_received = True
+            print(f"Message Received {message}")
 
         if area_id == "NM":
             # The feed time is in milliseconds, but python takes timestamps in seconds
@@ -99,6 +107,9 @@ def print_td_frame(parsed_body):
                         case '4065':
                             print (f"{uk_datetime} Down train {description} near Bleasby")
                             TrainOutOfSection("advance", "DOWN", description)
+                        case _:
+                            if from_berth[0:3] == '400':
+                                print(f"{uk_datetime} Down train {description} leaving Nottingham platform {from_berth[3]}")
 
             # For the sake of demonstration, we're only displaying C-trainClass messages
             if message_type in [S_SIGNALLING_UDPATE, S_SIGNALLING_REFRESH, S_SIGNALLING_REFRESH_FINISHED]:
