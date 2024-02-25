@@ -2,13 +2,14 @@
 
 # Standard
 import json
-from time import sleep
+import os
+import time
 from datetime import datetime
-from pytz import timezone
-import time,os
+from time import sleep
 
 # Third party
 import stomp
+from pytz import timezone
 
 # RPi
 if os.name == "posix":
@@ -28,21 +29,21 @@ TIMEZONE_LONDON: timezone = timezone("Europe/London")
 
 # TD message types
 
-C_BERTH_STEP = "CA"       # Berth step      - description moves from "from" berth into "to", "from" berth is erased
-C_BERTH_CANCEL = "CB"     # Berth cancel    - description is erased from "from" berth
+C_BERTH_STEP = "CA"  # Berth step      - description moves from "from" berth into "to", "from" berth is erased
+C_BERTH_CANCEL = "CB"  # Berth cancel    - description is erased from "from" berth
 C_BERTH_INTERPOSE = "CC"  # Berth interpose - description is inserted into the "to" berth, previous contents erased
-C_HEARTBEAT = "CT"        # Heartbeat       - sent periodically by a train describer
+C_HEARTBEAT = "CT"  # Heartbeat       - sent periodically by a train describer
 
-S_SIGNALLING_UDPATE = "SF"            # Signalling update
-S_SIGNALLING_REFRESH = "SG"           # Signalling refresh
+S_SIGNALLING_UDPATE = "SF"  # Signalling update
+S_SIGNALLING_REFRESH = "SG"  # Signalling refresh
 S_SIGNALLING_REFRESH_FINISHED = "SH"  # Signalling refresh finished
-
 
 message_received = False
 
+
 def print_td_frame(parsed_body):
     global message_received
-    
+
     # Each message in the queue is a JSON array
     for outer_message in parsed_body:
         # Each list element consists of a dict with a single entry - our real target - e.g. {"CA_MSG": {...}}
@@ -51,7 +52,7 @@ def print_td_frame(parsed_body):
         message_type = message["msg_type"]
         area_id = message["area_id"]
 
-        if message_received == False:
+        if not message_received:
             message_received = True
             print(f"Message Received {message}")
 
@@ -71,45 +72,48 @@ def print_td_frame(parsed_body):
                     print(f"{uk_datetime} {message_type} {area_id} {description} {from_berth}->{to_berth}")
                     match from_berth:
                         case '4072':
-                            print (f"{uk_datetime} Up train {description} near Fiskerton")
+                            print(f"{uk_datetime} Up train {description} near Fiskerton")
                             IsLineClear("rear", "UP", description)
                         case '4062':
-                            print (f"{uk_datetime} Up train {description} near Bleasby")
+                            print(f"{uk_datetime} Up train {description} near Bleasby")
                             TrainEnteringSection("rear", "UP", description)
                             long_pause()
                             IsLineClear("advance", "UP", description)
                         case '4050':
-                            print (f"{uk_datetime} Up train {description} near Lowdham")
-                            tc4601("OCCUPIED") 
+                            print(f"{uk_datetime} Up train {description} near Lowdham")
+                            tc4601("OCCUPIED")
                             TrainEnteringSection("advance", "UP", description)
                             long_pause()
                             TrainOutOfSection("rear", "UP", description)
-                            tc4601("CLEAR") 
+                            if description[0] == '6':
+                                time.sleep(8)  # Freight trains take a while to clear the TC!
+                            tc4601("CLEAR")
                         case '4042':
-                            print (f"{uk_datetime} Up train {description} near Burton Joyce")
+                            print(f"{uk_datetime} Up train {description} near Burton Joyce")
                             TrainOutOfSection("advance", "UP", description)
                         case '4036':
-                            print (f"{uk_datetime} Up train {description} near Carlton")
+                            print(f"{uk_datetime} Up train {description} near Carlton")
 
                         case '4037':
-                            print (f"{uk_datetime} Down train {description} near Carlton")
+                            print(f"{uk_datetime} Down train {description} near Carlton")
                             IsLineClear("rear", "DOWN", description)
                         case '4043':
-                            print (f"{uk_datetime} Down train {description} near Burton Joyce")
+                            print(f"{uk_datetime} Down train {description} near Burton Joyce")
                             TrainEnteringSection("rear", "DOWN", description)
                             long_pause()
                             IsLineClear("advance", "DOWN", description)
                         case '4051':
-                            print (f"{uk_datetime} Down train {description} near Lowdham")
+                            print(f"{uk_datetime} Down train {description} near Lowdham")
                             TrainEnteringSection("advance", "UP", description)
                             long_pause()
                             TrainOutOfSection("rear", "DOWN", description)
                         case '4065':
-                            print (f"{uk_datetime} Down train {description} near Bleasby")
+                            print(f"{uk_datetime} Down train {description} near Bleasby")
                             TrainOutOfSection("advance", "DOWN", description)
                         case _:
                             if from_berth[0:3] == '400':
-                                print(f"{uk_datetime} Down train {description} leaving Nottingham platform {from_berth[3]}")
+                                print(
+                                    f"{uk_datetime} Down train {description} leaving Nottingham platform {from_berth[3]}")
 
             # For the sake of demonstration, we're only displaying C-trainClass messages
             if message_type in [S_SIGNALLING_UDPATE, S_SIGNALLING_REFRESH, S_SIGNALLING_REFRESH_FINISHED]:
@@ -182,7 +186,7 @@ def IsLineClear(section, line, description):
             tap(section, line)
 
         case '3':
-            print(" (3-4-1)")   # RHTT
+            print(" (3-4-1)")  # RHTT
             ding(section, line)
             ding(section, line)
             ding(section, line)
@@ -245,6 +249,7 @@ def IsLineClear(section, line, description):
     pause2()
     peg(section, line, 'LC')
 
+
 def TrainEnteringSection(section, line, description):
     # section 'rear': Train is belled to us, we tap reply and peg up
     # section 'advance: We tap the code, and the reply is belled
@@ -253,14 +258,15 @@ def TrainEnteringSection(section, line, description):
 
     print(f"Train {description} Entering Section (2) on {line} (in {section})")
     ding(section, line)
-    time.sleep(0.2)         # Don't know why the pause in the 'ding()' isn't enough...
+    time.sleep(0.2)  # Don't know why the pause in the 'ding()' isn't enough...
     ding(section, line)
     long_pause()
     tap(section, line)
-    time.sleep(0.2)         # Don't know why the pause in the 'ding()' isn't enough...
+    time.sleep(0.2)  # Don't know why the pause in the 'ding()' isn't enough...
     tap(section, line)
     pause2()
     peg(section, line, 'TOL')
+
 
 def TrainOutOfSection(section, line, description):
     # section 'rear': Train is belled to us, we tap reply and peg up
@@ -273,7 +279,7 @@ def TrainOutOfSection(section, line, description):
     long_pause()
     ding(section, line)
     pause2()
-    
+
     print(f"Train {description} Out Of Section (2-1) on {line} (in {section})")
     tap(section, line)
     tap(section, line)
@@ -301,6 +307,7 @@ def ding(section, line):
     else:
         bell_tapper()
 
+
 def tap(section, line):
     # section 'rear': Tap the tapper
     # section 'advance: Ring the bell
@@ -314,17 +321,21 @@ def tap(section, line):
     else:
         bell_tapper()
 
+
 def pause():
     # short pause between taps, 300ms
     time.sleep(pause_period)
+
 
 def pause2():
     # Longer pause, say 1 second
     time.sleep(pause2_period)
 
+
 def long_pause():
     # Time for signalman to get to the bell, say 3 seconds
     time.sleep(long_period)
+
 
 def connect_and_subscribe():
     # Connect to feed
@@ -332,7 +343,7 @@ def connect_and_subscribe():
         "username": feed_username,
         "passcode": feed_password,
         "wait": True,
-        }
+    }
 
     # Subscription
     subscribe_headers = {
@@ -374,7 +385,7 @@ if __name__ == "__main__":
 
     # https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
     # We're committing to sending and accepting heartbeats every 5000ms
-    connection = stomp.Connection([('datafeeds.networkrail.co.uk', 61618)], keepalive=True, heartbeats=(20000, 20000))
+    connection = stomp.Connection([('publicdatafeeds.networkrail.co.uk', 61618)], keepalive=True, heartbeats=(20000, 20000))
     connection.set_listener('', Listener(connection))
 
     print("Testing")
