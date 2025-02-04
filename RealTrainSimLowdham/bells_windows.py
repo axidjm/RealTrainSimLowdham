@@ -1,6 +1,7 @@
-import winsound
-from time import sleep
 import time
+import winsound
+
+# from time import sleep
 
 gap_period = 0.3
 

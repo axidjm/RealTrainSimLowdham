@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "RealTrainSimLowdham"
+version = "1.0.0"
+description = ""
+authors = ["Lowdham Railway Heritage"]
+
+[tool.poetry.dependencies]
+pytz = "^2025.1"
+python = ">=3.11,<3.14"
+python-dotenv = "^1.0"
+#pywin32 = "^306"
+#paho-mqtt = "^2.0"
+pyinstaller = "^6.8"
+httpx = "^0.28"
+stomp-py = "^8.2"
+docopt = "^0.6"
+websocket-client = "^1.8"
+
+[tool.poetry.group.dev.dependencies]
+black = ">=21.6b0"
+mypy = ">=0.902"
+pre-commit = "^3.0"
+psutil = "^5.8"
+isort = "^5.8"
+bump2version = "^1.0.1"
+
+[tool.black]
+line_length = 98
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 98
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
