@@ -2,18 +2,23 @@
 
 # Standard
 import json
-import os
 import time
 from datetime import datetime
 from time import sleep
 
 # Third party
 import stomp
-from pytz import timezone
 
 # Project
-from bells import bells_test, tc4601, IsLineClear, TrainEnteringSection, TrainOutOfSection,long_pause
-
+from bells import (
+    IsLineClear,
+    TrainEnteringSection,
+    TrainOutOfSection,
+    bells_test,
+    long_pause,
+    tc4601,
+)
+from pytz import timezone
 
 __version__ = "1.0.0"
 
@@ -53,7 +58,7 @@ def print_td_frame(parsed_body):
             # The feed time is in milliseconds, but python takes timestamps in seconds
             timestamp = int(int(message["time"]) / 1000)
             utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone("utc"))
-            #uk_datetime = TIMEZONE_LONDON.fromutc(dt=utc_datetime).strftime("%Y-%m-%d %H:%M:%S")
+            # uk_datetime = TIMEZONE_LONDON.fromutc(dt=utc_datetime).strftime("%Y-%m-%d %H:%M:%S")
             uk_datetime = utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
             # For the sake of demonstration, we're only displaying C-trainClass messages
@@ -146,6 +151,7 @@ def connect_and_subscribe():
     connection.connect(**connect_headers)
     connection.subscribe(**subscribe_headers)
 
+
 class Listener(stomp.ConnectionListener):
     _mq: stomp.Connection
 
@@ -170,6 +176,7 @@ class Listener(stomp.ConnectionListener):
 
 
 if __name__ == "__main__":
+    print("Signalling real trains as the pass Lowdham ", __version__)
     # Sample code is here: https://github.com/openraildata/td-trust-example-python3/blob/master/main.py
 
     # https://stomp.github.io/stomp-specification-1.2.html#Heart-beating

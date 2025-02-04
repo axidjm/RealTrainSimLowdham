@@ -692,6 +692,18 @@ docopt = ">=0.6.2,<0.7.0"
 websocket-client = ">=1.2.3,<2.0.0"
 
 [[package]]
+name = "types-pytz"
+version = "2025.1.0.20250204"
+description = "Typing stubs for pytz"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "types_pytz-2025.1.0.20250204-py3-none-any.whl", hash = "sha256:32ca4a35430e8b94f6603b35beb7f56c32260ddddd4f4bb305fdf8f92358b87e"},
+    {file = "types_pytz-2025.1.0.20250204.tar.gz", hash = "sha256:00f750132769f1c65a4f7240bc84f13985b4da774bd17dfbe5d9cd442746bd49"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -745,4 +757,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "15a122e12fe14b512356f1500ca279e71376de3ef7d93893fac3384e9302b642"
+content-hash = "60de958fba1b55e10aa2f1937306f513d0493fc6e0aac9fbd17ffc9ea60e06d3"

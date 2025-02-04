@@ -6,6 +6,7 @@ authors = ["Lowdham Railway Heritage"]
 
 [tool.poetry.dependencies]
 pytz = "^2025.1"
+types-pytz = "^2025.1"
 python = ">=3.11,<3.14"
 python-dotenv = "^1.0"
 #pywin32 = "^306"

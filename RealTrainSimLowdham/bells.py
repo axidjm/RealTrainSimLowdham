@@ -2,15 +2,15 @@ import time
 
 if True:
     print("Importing bells_dingtian")
-    from bells_dingtian import bells_init, set_output, clr_output, pulse_output
-#elif os.name == "posix":
-    # RPi
-    #print("Importing bells_gpio")
-    #from bells_gpio import bells_init, set_output, clr_output, pulse_output
-#elif os.name == "nt":
-    # windows
-    #print("Importing bells_windows")
-    #from bells_windows import bells_init, set_output, clr_output, pulse_output
+    from bells_dingtian import bells_init, clr_output, pulse_output, set_output
+# elif os.name == "posix":
+# RPi
+# print("Importing bells_gpio")
+# from bells_gpio import bells_init, set_output, clr_output, pulse_output
+# elif os.name == "nt":
+# windows
+# print("Importing bells_windows")
+# from bells_windows import bells_init, set_output, clr_output, pulse_output
 
 # Relays
 tap_relay = 0  # appr_bell/tap
@@ -29,6 +29,7 @@ long_period = 2.5
 
 pulse_period = 0.15
 gap_period = 0.25
+
 
 def bells_test():
     bells_init()

@@ -2,6 +2,8 @@
 
 import httpx
 
+debug = 0
+
 # Relays
 tap_relay = 0  # appr_bell/tap
 tc4601_out = 1
@@ -13,6 +15,7 @@ lh_th_tol = 6
 lh_th_bell = 7
 
 relay_board_ip = "192.168.212.210"
+
 
 def bells_init():
     print("Init Bells")
@@ -37,7 +40,8 @@ def clr_output(relay):
 
 def send(args):
     url = f"http://{relay_board_ip}/relay_cgi.cgi?{args}&pwd=0"
-    print(f"Sending {url}")
+    if debug:
+        print(f"Sending {url}")
 
     _CLIENT = httpx.Client(timeout=httpx.Timeout(5, pool=5))
     response = _CLIENT.get(
@@ -50,5 +54,3 @@ def send(args):
         pass
     else:
         print(f"Failed: got {response.status_code} from {response.request}")
-
-
