@@ -14,7 +14,7 @@ lh_th_lc = 5
 lh_th_tol = 6
 lh_th_bell = 7
 
-relay_board_ip = "192.168.212.210"
+relay_board_ip = "192.168.1.210"
 
 
 def bells_init():
@@ -43,11 +43,16 @@ def send(args):
     if debug:
         print(f"Sending {url}")
 
-    _CLIENT = httpx.Client(timeout=httpx.Timeout(5, pool=5))
-    response = _CLIENT.get(
-        url=url,
-        headers={"Content-Type": "application/json", "Accept": "text/plain"},
-    )
+    try:
+        # http_client = httpx.AsyncClient()
+        _CLIENT = httpx.Client(timeout=httpx.Timeout(5, pool=5))
+        response = _CLIENT.get(
+            url=url,
+            headers={"Content-Type": "application/json", "Accept": "text/plain"},
+        )
+    except httpx.ConnectTimeout:
+        print(f"Connection timed out to {url}")
+        return
 
     if response.status_code == httpx.codes.OK:
         # print(f"Success: got 200 from {response.request}")
