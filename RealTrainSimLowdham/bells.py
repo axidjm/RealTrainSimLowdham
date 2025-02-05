@@ -48,8 +48,6 @@ def bells_test():
     clr_output(tap_relay)
     time.sleep(1.0)
 
-    tc4601("CLEAR")
-    time.sleep(2.0)
     tc4601("OCCUPIED")
     time.sleep(1.0)
     tc4601("CLEAR")  # Leave TC 'clear'
@@ -349,10 +347,10 @@ def tc4601(state):
     print(f"Track Circuit {state}")
     match state:
         case "OCCUPIED":
-            clr_output(tc4601_out)
+            set_output(tc4601_out)
 
         case "CLEAR":
-            set_output(tc4601_out)
+            clr_output(tc4601_out)
 
         case _:
             print("Unknown TC state {state}")
