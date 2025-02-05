@@ -100,7 +100,7 @@ def IsLineClear(section, line, description):
 
     match trainClass:
         case "0":
-            print(" ding (2-3)")
+            print(" ding (2-3)", end="")
             ding(section, line)
             ding(section, line)
             pause()
@@ -108,7 +108,7 @@ def IsLineClear(section, line, description):
             ding(section, line)
             ding(section, line)
             pause2()
-            print("tap (2-3)")
+            print(" tap (2-3)")
             tap(section, line)
             tap(section, line)
             pause()
@@ -117,27 +117,27 @@ def IsLineClear(section, line, description):
             tap(section, line)
 
         case "1":
-            print(" ding (4)")
+            print(" ding (4)", end="")
             ding(section, line)
             ding(section, line)
             ding(section, line)
             ding(section, line)
             pause2()
-            print("tap (4)")
+            print(" tap (4)")
             tap(section, line)
             tap(section, line)
             tap(section, line)
             tap(section, line)
 
         case "2":
-            print(" ding (3-1)")
+            print(" ding (3-1)", end="")
             ding(section, line)
             ding(section, line)
             ding(section, line)
             pause()
             ding(section, line)
             pause2()
-            print("tap (3-1)")
+            print(" tap (3-1)")
             tap(section, line)
             tap(section, line)
             tap(section, line)
@@ -145,7 +145,7 @@ def IsLineClear(section, line, description):
             tap(section, line)
 
         case "3":
-            print(" ding (3-4-1)")  # RHTT
+            print(" ding (3-4-1)", end="")  # RHTT
             ding(section, line)
             ding(section, line)
             ding(section, line)
@@ -157,7 +157,7 @@ def IsLineClear(section, line, description):
             pause()
             ding(section, line)
             pause2()
-            print("tap (3-4-1)")
+            print(" tap (3-4-1)")
             tap(section, line)
             tap(section, line)
             tap(section, line)
@@ -170,7 +170,7 @@ def IsLineClear(section, line, description):
             tap(section, line)
 
         case "5":
-            print(" ding (2-2-1)")
+            print(" ding (2-2-1)", end="")
             ding(section, line)
             ding(section, line)
             pause()
@@ -179,7 +179,7 @@ def IsLineClear(section, line, description):
             pause()
             ding(section, line)
             pause2()
-            print("tap (2-2-1)")
+            print(" tap (2-2-1)")
             tap(section, line)
             tap(section, line)
             pause()
@@ -189,7 +189,7 @@ def IsLineClear(section, line, description):
             tap(section, line)
 
         case "6":
-            print(" ding (1-4)")
+            print(" ding (1-4)", end="")
             ding(section, line)
             pause()
             ding(section, line)
@@ -197,7 +197,7 @@ def IsLineClear(section, line, description):
             ding(section, line)
             ding(section, line)
             pause2()
-            print("tap (1-4)")
+            print(" tap (1-4)")
             tap(section, line)
             pause()
             tap(section, line)

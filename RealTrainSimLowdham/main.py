@@ -88,7 +88,8 @@ def print_td_frame(parsed_body):
                             long_pause()
                             TrainOutOfSection("rear", "UP", description)
                             if description[0] == "6":
-                                time.sleep(8)  # Freight trains take a while to clear the TC!
+                                print("20 sec delay extra before clearing TC")
+                                time.sleep(20)  # Freight trains take a while to clear the TC!
                             tc4601("CLEAR")
                         case "4042":
                             print(f"{uk_datetime} Up train {description} near Burton Joyce")
@@ -107,7 +108,8 @@ def print_td_frame(parsed_body):
                         case "4051":
                             print(f"{uk_datetime} Down train {description} near Lowdham")
                             TrainEnteringSection("advance", "UP", description)
-                            time.sleep(8)
+                            print("20 sec delay before TrainOutOfSection")
+                            time.sleep(20)
                             TrainOutOfSection("rear", "DOWN", description)
                         case "4065":
                             print(f"{uk_datetime} Down train {description} near Bleasby")
