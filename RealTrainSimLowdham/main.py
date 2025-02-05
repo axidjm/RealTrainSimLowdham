@@ -21,6 +21,7 @@ from bells import (
 from pytz import timezone
 
 __version__ = "1.0.0"
+debug = False
 
 TIMEZONE_LONDON: timezone = timezone("Europe/London")
 
@@ -119,7 +120,9 @@ def print_td_frame(parsed_body):
                                 )
 
             # For the sake of demonstration, we're only displaying C-trainClass messages
-            if message_type in [
+            # Docs on S-messages is thin to non-existent
+            # https://wiki.openraildata.com/index.php/S_Class_Messages
+            if debug and message_type in [
                 S_SIGNALLING_UDPATE,
                 S_SIGNALLING_REFRESH,
                 S_SIGNALLING_REFRESH_FINISHED,
