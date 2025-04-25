@@ -14,7 +14,7 @@ lh_th_lc = 5
 lh_th_tol = 6
 lh_th_bell = 7
 
-relay_board_ip = "192.168.1.210"
+relay_board_ip = "192.168.1.102"
 
 
 def bells_init():
