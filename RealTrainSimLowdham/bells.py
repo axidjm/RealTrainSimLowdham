@@ -1,26 +1,31 @@
 import time
 
-if True:
-    print("Importing bells_dingtian")
-    from bells_dingtian import bells_init, clr_output, pulse_output, set_output
-# elif os.name == "posix":
-# RPi
-# print("Importing bells_gpio")
-# from bells_gpio import bells_init, set_output, clr_output, pulse_output
-# elif os.name == "nt":
-# windows
-# print("Importing bells_windows")
-# from bells_windows import bells_init, set_output, clr_output, pulse_output
+from bells_windows import bell_tapper, down_bell, up_bell
+from block_dingtian import clr_output, pulse_output, pulse_output2, set_output
 
 # Relays
-tap_relay = 0  # appr_bell/tap
-tc4601_out = 1
-lh_bj_bell = 2
+
+# These relays enable the remote signalman to peg up
 lh_bj_lc = 3
 lh_bj_tol = 4
-lh_th_lc = 5
-lh_th_tol = 6
-lh_th_bell = 7
+lh_th_lc = 7
+lh_th_tol = 8
+
+# These relays override the local galvo on the pegging instrument
+lh_bj_lc2 = 1
+lh_bj_tol2 = 2
+lh_th_lc2 = 5
+lh_th_tol2 = 6
+
+lamp1_out = 9
+lamp2_out = 10
+lamp3_out = 11
+lamp4_out = 12
+
+tc4601_out = 13
+approach_bell = 14
+platform_bell = 15
+normal_standby = 16
 
 # Times
 pause_period = 0.5
@@ -32,55 +37,52 @@ gap_period = 0.25
 
 
 def bells_test():
-    bells_init()
-
     print("Testing Bells\n")
     print("BJ Bell")
-    pulse_output(lh_bj_bell)
+    up_bell()
     time.sleep(gap_period)
     print("Thur Bell")
-    pulse_output(lh_th_bell)
+    down_bell()
     time.sleep(1.0)
 
-    print("tap relay")
-    set_output(tap_relay)
-    time.sleep(2.0)
-    clr_output(tap_relay)
+    print("tap")
+    bell_tapper()
     time.sleep(1.0)
 
     tc4601("OCCUPIED")
     time.sleep(1.0)
     tc4601("CLEAR")  # Leave TC 'clear'
 
-    print("BJ line clear")
-    set_output(lh_bj_lc)
-    time.sleep(2.0)
-    clr_output(lh_bj_lc)
-    time.sleep(1.0)
+    BlockTest("advance", "UP")
+    BlockTest("rear", "UP")
+    BlockTest("advance", "DOWN")
+    BlockTest("rear", "DOWN")
 
-    print("BJ Train on Line")
-    set_output(lh_bj_tol)
-    time.sleep(2.0)
-    clr_output(lh_bj_tol)
-    time.sleep(1.0)
+    pulse_output2(lamp1_out, 1.5, 0.5)
+    pulse_output2(lamp2_out, 1.5, 0.5)
+    pulse_output2(lamp3_out, 1.5, 0.5)
+    pulse_output2(lamp4_out, 1.5, 0.5)
 
-    print("Thur line clear")
-    set_output(lh_th_lc)
-    time.sleep(2.0)
-    clr_output(lh_th_lc)
-    time.sleep(1.0)
+    pulse_output2(approach_bell, 1.5, 0.5)
+    pulse_output2(platform_bell, 1.5, 0.5)
+    set_output(normal_standby)
 
-    print("Thur Train on Line")
-    set_output(lh_th_tol)
-    time.sleep(2.0)
-    clr_output(lh_th_tol)
-    time.sleep(1.0)
+
+def BlockTest(section, line):
+    peg(section, line, "LC")
+    time.sleep(1.5)
+    peg(section, line, "TOL")
+    time.sleep(1.5)
+    peg(section, line, "NORMAL")
+    time.sleep(0.5)
 
 
 def IsLineClear(section, line, description):
     trainClass = description[0]
+    # trainClass 0: 2-3
     # trainClass 1: 4
     # trainClass 2: 3-1
+    # trainClass 3: 3-4-1
     # trainClass 5: 2-2-1
     # trainClass 6: 1-4
 
@@ -298,17 +300,17 @@ def long_pause():
 
 
 def peg(section, line, state):
-    # section 'rear': do nothing
-    # section 'advance: peg up
-
+    # section 'rear': override the galvo on the pegging instrument
+    # section 'advance: The remote signalman pegs up
     # Line is UP or DOWN
-
     # state is 'LC', 'TOL' or 'NORMAL'
 
+    lc_relay = 0
+    tol_relay = 0
+
+    print(f"Pegging {state} on {line} (in {section})")
+
     if section == "advance":
-        print(f"Pegging {state} on {line} (in {section})")
-        lc_relay = 0
-        tol_relay = 0
         match line:
             case "UP":
                 lc_relay = lh_bj_lc
@@ -317,30 +319,26 @@ def peg(section, line, state):
                 lc_relay = lh_th_lc
                 tol_relay = lh_th_tol
 
-        match state:
-            case "LC":
-                set_output(lc_relay)
-                clr_output(tol_relay)
-            case "TOL":
-                clr_output(lc_relay)
-                set_output(tol_relay)
-            case "NORMAL":
-                clr_output(lc_relay)
-                clr_output(tol_relay)
     else:
         print(f"Signalman should peg {state} on {line} (in {section})")
+        match line:
+            case "UP":
+                lc_relay = lh_bj_lc2
+                tol_relay = lh_bj_tol2
+            case "DOWN":
+                lc_relay = lh_th_lc2
+                tol_relay = lh_th_tol2
 
-
-def up_bell():
-    pulse_output(lh_bj_bell)
-
-
-def down_bell():
-    pulse_output(lh_th_bell)
-
-
-def bell_tapper():
-    pulse_output(tap_relay)
+    match state:
+        case "LC":
+            set_output(lc_relay)
+            clr_output(tol_relay)
+        case "TOL":
+            clr_output(lc_relay)
+            set_output(tol_relay)
+        case "NORMAL":
+            clr_output(lc_relay)
+            clr_output(tol_relay)
 
 
 def tc4601(state):

@@ -1,33 +1,23 @@
 # from time import sleep
 
+import time
+
 import httpx
 
 debug = 0
 
-# Relays
-tap_relay = 0  # appr_bell/tap
-tc4601_out = 1
-lh_bj_bell = 2
-lh_bj_lc = 3
-lh_bj_tol = 4
-lh_th_lc = 5
-lh_th_tol = 6
-lh_th_bell = 7
-
 relay_board_ip = "192.168.1.102"
 
 
-def bells_init():
-    print("Init Bells")
-    pass
-
-
 def pulse_output(relay):
-    # set_output(relay)
-    # time.sleep(pulse_period)
-    # clr_output(relay)
-    # time.sleep(gap_period)
     send(f"type=1&relay={relay}&on=1&time=1")
+
+
+def pulse_output2(relay, pulse_period, gap_period):
+    set_output(relay)
+    time.sleep(pulse_period)
+    clr_output(relay)
+    time.sleep(gap_period)
 
 
 def set_output(relay):
