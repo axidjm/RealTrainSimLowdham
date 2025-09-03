@@ -181,7 +181,7 @@ class Listener(stomp.ConnectionListener):
 
 
 if __name__ == "__main__":
-    print("Signalling real trains as the pass Lowdham ", __version__)
+    print("Signalling real trains as they pass Lowdham ", __version__)
     # Sample code is here: https://github.com/openraildata/td-trust-example-python3/blob/master/main.py
 
     # https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
@@ -191,8 +191,11 @@ if __name__ == "__main__":
     )
     connection.set_listener("", Listener(connection))
 
-    bells_test()
-    print("End of test")
+    try:
+        # bells_test()
+        print("End of test")
+    except KeyboardInterrupt:
+            print("Keyboard interrupt")
 
     while 1:
         try:

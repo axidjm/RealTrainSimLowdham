@@ -1,7 +1,7 @@
 import time
 
 from bells_windows import bell_tapper, down_bell, up_bell
-from block_dingtian import clr_output, pulse_output, pulse_output2, set_output
+from block_dingtian import clr_output, pulse_output2, set_output
 
 # Relays
 
@@ -40,7 +40,7 @@ def bells_test():
     print("Testing Bells\n")
     print("BJ Bell")
     up_bell()
-    time.sleep(gap_period)
+    time.sleep(1.0)
     print("Thur Bell")
     down_bell()
     time.sleep(1.0)
@@ -48,10 +48,6 @@ def bells_test():
     print("tap")
     bell_tapper()
     time.sleep(1.0)
-
-    tc4601("OCCUPIED")
-    time.sleep(1.0)
-    tc4601("CLEAR")  # Leave TC 'clear'
 
     BlockTest("advance", "UP")
     BlockTest("rear", "UP")
@@ -62,6 +58,10 @@ def bells_test():
     pulse_output2(lamp2_out, 1.5, 0.5)
     pulse_output2(lamp3_out, 1.5, 0.5)
     pulse_output2(lamp4_out, 1.5, 0.5)
+
+    tc4601("OCCUPIED")
+    time.sleep(1.0)
+    tc4601("CLEAR")  # Leave TC 'clear'
 
     pulse_output2(approach_bell, 1.5, 0.5)
     pulse_output2(platform_bell, 1.5, 0.5)
@@ -74,6 +74,7 @@ def BlockTest(section, line):
     peg(section, line, "TOL")
     time.sleep(1.5)
     peg(section, line, "NORMAL")
+    print("")
     time.sleep(0.5)
 
 

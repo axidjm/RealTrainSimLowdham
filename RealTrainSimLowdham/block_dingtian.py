@@ -1,11 +1,9 @@
 # from time import sleep
 
+import httpx
 import time
 
-import httpx
-
 debug = 0
-
 relay_board_ip = "192.168.1.102"
 
 
