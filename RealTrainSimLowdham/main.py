@@ -3,6 +3,7 @@
 # Standard
 import json
 import time
+
 # import asyncio
 from datetime import datetime
 from time import sleep
@@ -39,6 +40,7 @@ S_SIGNALLING_REFRESH_FINISHED = "SH"  # Signalling refresh finished
 
 message_received = False
 connection = None
+
 
 def handle_td_frame(parsed_body):
     global message_received
@@ -118,6 +120,10 @@ def handle_nm_message(uk_datetime, message_type, area_id, description, from_bert
 
             delay = 20 if description[0] == "6" else 5
             SleepThenTCclear(delay)
+            # create a coroutine for the blocking function call
+            # coro = asyncio.to_thread(SleepThenTCclear, delay)
+            # execute the call in a new thread independently
+            # task = asyncio.create_task(coro)
 
         case "4042":
             print(f"{uk_datetime} Up train {description} near Burton Joyce")
@@ -139,7 +145,11 @@ def handle_nm_message(uk_datetime, message_type, area_id, description, from_bert
         case "4051":
             print(f"{uk_datetime} Down train {description} near Lowdham")
             TrainEnteringSection("advance", "UP", description)
-            SleepThenTOS(20,"rear", "DOWN", description)
+            SleepThenTOS(20, "rear", "DOWN", description)
+            # create a coroutine for the blocking function call
+            # coro = asyncio.to_thread(SleepThenTOS,20,"rear", "DOWN", description)
+            # execute the call in a new thread independently
+            # task = asyncio.create_task(coro)
 
         case "4065":
             print(f"{uk_datetime} Down train {description} near Bleasby")
@@ -151,15 +161,18 @@ def handle_nm_message(uk_datetime, message_type, area_id, description, from_bert
                     f"{uk_datetime} Down train {description} leaving Nottingham platform {from_berth[3]}"
                 )
 
+
 def SleepThenTCclear(delay):
     print(f"{delay} sec delay before clearing TC")
     time.sleep(delay)
     tc4601("CLEAR")
 
-def SleepThenTOS(delay, section, line , description):
+
+def SleepThenTOS(delay, section, line, description):
     print(f"{delay} sec delay before TrainOutOfSection")
     time.sleep(delay)
     TrainOutOfSection(section, line, description)
+
 
 def connect_and_subscribe():
     # Connect to feed
@@ -203,10 +216,33 @@ class Listener(stomp.ConnectionListener):
     def on_disconnected(self):
         print("disconnected")
 
+
 def main():
     print("Signalling real trains as they pass Lowdham ", __version__)
     # Sample code is here: https://github.com/openraildata/td-trust-example-python3/blob/master/main.py
 
+    try:
+        bells_test()
+        print("End of test")
+
+        while 1:
+            try:
+                sleep(1)
+                connect_and_subscribe()
+
+                while connection.is_connected():
+                    sleep(1)
+            except KeyboardInterrupt:
+                print("Keyboard interrupt")
+                raise KeyboardInterrupt
+            except:
+                print("Connection failed")
+
+    except KeyboardInterrupt:
+        print("Keyboard interrupt")
+
+
+if __name__ == "__main__":
     # https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
     # We're committing to sending and accepting heartbeats every 5000ms
     connection = stomp.Connection(
@@ -214,24 +250,6 @@ def main():
     )
     connection.set_listener("", Listener(connection))
 
-    try:
-        # bells_test()
-        print("End of test")
-    except KeyboardInterrupt:
-            print("Keyboard interrupt")
-
-    while 1:
-        try:
-            sleep(1)
-            connect_and_subscribe()
-
-            while connection.is_connected():
-                sleep(1)
-        except KeyboardInterrupt:
-            print("Keyboard interrupt")
-            break
-        except:
-            print("Connection failed")
-
-if __name__ == "__main__":
+    # start the asyncio program
+    # asyncio.run(main())
     main()

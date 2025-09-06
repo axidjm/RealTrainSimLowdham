@@ -1,6 +1,6 @@
 import time
 
-from bells_windows import bell_tapper, down_bell, up_bell
+from bells_windows import down_tap, up_tap, down_bell, up_bell
 from block_dingtian import clr_output, pulse_output2, set_output
 
 # Relays
@@ -28,8 +28,8 @@ platform_bell = 15
 normal_standby = 16
 
 # Times
-pause_period = 0.7
-pause2_period = 1.3
+pause_period = 0.4
+pause2_period = 1.0
 long_period = 2.5
 
 pulse_period = 0.15
@@ -53,13 +53,8 @@ def bells_test():
     down_bell()
     time.sleep(long_period)
 
-    print("tap")
-    bell_tapper()
-    time.sleep(pause_period)
-    bell_tapper()
-    time.sleep(pause2_period)
-    bell_tapper()
-    time.sleep(long_period)
+    TrainOutOfSection("advance", "UP", "Test advance")
+    TrainOutOfSection("rear", "UP", "Test rear")
 
     BlockTest("advance", "UP")
     BlockTest("rear", "UP")
@@ -280,7 +275,10 @@ def ding(section, line):
         else:
             up_bell()
     else:
-        bell_tapper()
+        if line == "UP":
+            up_tap()
+        else:
+            down_tap()
 
 
 def tap(section, line):
@@ -294,7 +292,10 @@ def tap(section, line):
         else:
             down_bell()
     else:
-        bell_tapper()
+        if line == "UP":
+            up_tap()
+        else:
+            down_tap()
 
 
 def pause():
