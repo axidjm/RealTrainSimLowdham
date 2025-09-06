@@ -28,8 +28,8 @@ platform_bell = 15
 normal_standby = 16
 
 # Times
-pause_period = 0.5
-pause2_period = 1.0
+pause_period = 0.7
+pause2_period = 1.3
 long_period = 2.5
 
 pulse_period = 0.15
@@ -40,14 +40,26 @@ def bells_test():
     print("Testing Bells\n")
     print("BJ Bell")
     up_bell()
-    time.sleep(1.0)
+    time.sleep(pause_period)
+    up_bell()
+    time.sleep(pause2_period)
+    up_bell()
+    time.sleep(long_period)
     print("Thur Bell")
     down_bell()
-    time.sleep(1.0)
+    time.sleep(pause_period)
+    down_bell()
+    time.sleep(pause2_period)
+    down_bell()
+    time.sleep(long_period)
 
     print("tap")
     bell_tapper()
-    time.sleep(1.0)
+    time.sleep(pause_period)
+    bell_tapper()
+    time.sleep(pause2_period)
+    bell_tapper()
+    time.sleep(long_period)
 
     BlockTest("advance", "UP")
     BlockTest("rear", "UP")
