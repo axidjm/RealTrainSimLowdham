@@ -1,9 +1,10 @@
 # from time import sleep
 
-import httpx
 import time
 
-debug = 0
+import httpx
+
+debug = 1
 relay_board_ip = "192.168.1.102"
 
 
@@ -30,6 +31,7 @@ def send(args):
     url = f"http://{relay_board_ip}/relay_cgi.cgi?{args}&pwd=0"
     if debug:
         print(f"Sending {url}")
+        return
 
     try:
         # http_client = httpx.AsyncClient()
