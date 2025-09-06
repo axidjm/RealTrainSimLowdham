@@ -1,4 +1,4 @@
-import time
+# import time
 import winsound
 
 # from time import sleep
