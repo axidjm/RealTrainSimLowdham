@@ -3,6 +3,7 @@
 # Standard
 import json
 import time
+# import asyncio
 from datetime import datetime
 from time import sleep
 
@@ -37,9 +38,9 @@ S_SIGNALLING_REFRESH = "SG"  # Signalling refresh
 S_SIGNALLING_REFRESH_FINISHED = "SH"  # Signalling refresh finished
 
 message_received = False
+connection = None
 
-
-def print_td_frame(parsed_body):
+def handle_td_frame(parsed_body):
     global message_received
 
     # print("Received a message\n")
@@ -48,94 +49,117 @@ def print_td_frame(parsed_body):
         # Each list element consists of a dict with a single entry - our real target - e.g. {"CA_MSG": {...}}
         message = list(outer_message.values())[0]
 
-        message_type = message["msg_type"]
-        area_id = message["area_id"]
-
         # print("Received message type: ", message_type, " area_id: ", area_id)
         if not message_received:
             print(f"Message Received {message}")
+            message_received = True
 
-        if area_id == "NM":
-            # The feed time is in milliseconds, but python takes timestamps in seconds
-            timestamp = int(int(message["time"]) / 1000)
-            utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone("utc"))
-            # uk_datetime = TIMEZONE_LONDON.fromutc(dt=utc_datetime).strftime("%Y-%m-%d %H:%M:%S")
-            uk_datetime = utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        handle_message(message)
 
-            # For the sake of demonstration, we're only displaying C-trainClass messages
-            if message_type in [C_BERTH_STEP, C_BERTH_CANCEL, C_BERTH_INTERPOSE]:
-                description = message.get("descr", "")
-                from_berth = message.get("from", "")
-                to_berth = message.get("to", "")
 
-                if from_berth.startswith("40"):
-                    print(
-                        f"{uk_datetime} {message_type} {area_id} {description} {from_berth}->{to_berth}"
-                    )
-                    match from_berth:
-                        case "4072":
-                            print(f"{uk_datetime} Up train {description} near Fiskerton")
-                            IsLineClear("rear", "UP", description)
-                        case "4062":
-                            print(f"{uk_datetime} Up train {description} near Bleasby")
-                            TrainEnteringSection("rear", "UP", description)
-                            long_pause()
-                            IsLineClear("advance", "UP", description)
-                        case "4050":
-                            print(f"{uk_datetime} Up train {description} near Lowdham")
-                            tc4601("OCCUPIED")
-                            TrainEnteringSection("advance", "UP", description)
-                            long_pause()
-                            TrainOutOfSection("rear", "UP", description)
-                            if description[0] == "6":
-                                print("20 sec delay extra before clearing TC")
-                                time.sleep(20)  # Freight trains take a while to clear the TC!
-                            tc4601("CLEAR")
-                        case "4042":
-                            print(f"{uk_datetime} Up train {description} near Burton Joyce")
-                            TrainOutOfSection("advance", "UP", description)
-                        case "4036":
-                            print(f"{uk_datetime} Up train {description} near Carlton")
+def handle_message(message):
+    message_type = message["msg_type"]
+    area_id = message["area_id"]
 
-                        case "4037":
-                            print(f"{uk_datetime} Down train {description} near Carlton")
-                            IsLineClear("rear", "DOWN", description)
-                        case "4043":
-                            print(f"{uk_datetime} Down train {description} near Burton Joyce")
-                            TrainEnteringSection("rear", "DOWN", description)
-                            long_pause()
-                            IsLineClear("advance", "DOWN", description)
-                        case "4051":
-                            print(f"{uk_datetime} Down train {description} near Lowdham")
-                            TrainEnteringSection("advance", "UP", description)
-                            print("20 sec delay before TrainOutOfSection")
-                            time.sleep(20)
-                            TrainOutOfSection("rear", "DOWN", description)
-                        case "4065":
-                            print(f"{uk_datetime} Down train {description} near Bleasby")
-                            TrainOutOfSection("advance", "DOWN", description)
-                        case _:
-                            if from_berth[0:3] == "400":
-                                print(
-                                    f"{uk_datetime} Down train {description} "
-                                    f"leaving Nottingham platform {from_berth[3]}"
-                                )
+    if area_id != "NM":
+        return
 
-            # For the sake of demonstration, we're only displaying C-trainClass messages
-            # Docs on S-messages is thin to non-existent
-            # https://wiki.openraildata.com/index.php/S_Class_Messages
-            if debug and message_type in [
-                S_SIGNALLING_UDPATE,
-                S_SIGNALLING_REFRESH,
-                S_SIGNALLING_REFRESH_FINISHED,
-            ]:
-                address = message.get("address", "")
-                data = message.get("data", "")
+    # The feed time is in milliseconds, but python takes timestamps in seconds
+    timestamp = int(int(message["time"]) / 1000)
+    utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone("utc"))
+    # uk_datetime = TIMEZONE_LONDON.fromutc(dt=utc_datetime).strftime("%Y-%m-%d %H:%M:%S")
+    uk_datetime = utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
-                print(f"{uk_datetime} {message_type} {area_id} {address} {data}")
+    # For the sake of demonstration, we're only displaying C-trainClass messages
+    if message_type in [C_BERTH_STEP, C_BERTH_CANCEL, C_BERTH_INTERPOSE]:
+        description = message.get("descr", "")
+        from_berth = message.get("from", "")
+        to_berth = message.get("to", "")
 
-    message_received = True
+        if from_berth.startswith("40"):
+            handle_nm_message(
+                uk_datetime, message_type, area_id, description, from_berth, to_berth
+            )
 
+    # For the sake of demonstration, we're only displaying C-trainClass messages
+    # Docs on S-messages is thin to non-existent
+    # https://wiki.openraildata.com/index.php/S_Class_Messages
+
+    if debug and message_type in [
+        S_SIGNALLING_UDPATE,
+        S_SIGNALLING_REFRESH,
+        S_SIGNALLING_REFRESH_FINISHED,
+    ]:
+        address = message.get("address", "")
+        data = message.get("data", "")
+
+        print(f"{uk_datetime} {message_type} {area_id} {address} {data}")
+
+
+def handle_nm_message(uk_datetime, message_type, area_id, description, from_berth, to_berth):
+    print(f"{uk_datetime} {message_type} {area_id} {description} {from_berth}->{to_berth}")
+    match from_berth:
+        case "4072":
+            print(f"{uk_datetime} Up train {description} near Fiskerton")
+            IsLineClear("rear", "UP", description)
+
+        case "4062":
+            print(f"{uk_datetime} Up train {description} near Bleasby")
+            TrainEnteringSection("rear", "UP", description)
+            long_pause()
+            IsLineClear("advance", "UP", description)
+
+        case "4050":
+            print(f"{uk_datetime} Up train {description} near Lowdham")
+            tc4601("OCCUPIED")
+            TrainEnteringSection("advance", "UP", description)
+            long_pause()
+            TrainOutOfSection("rear", "UP", description)
+
+            delay = 20 if description[0] == "6" else 5
+            SleepThenTCclear(delay)
+
+        case "4042":
+            print(f"{uk_datetime} Up train {description} near Burton Joyce")
+            TrainOutOfSection("advance", "UP", description)
+
+        case "4036":
+            print(f"{uk_datetime} Up train {description} near Carlton")
+
+        case "4037":
+            print(f"{uk_datetime} Down train {description} near Carlton")
+            IsLineClear("rear", "DOWN", description)
+
+        case "4043":
+            print(f"{uk_datetime} Down train {description} near Burton Joyce")
+            TrainEnteringSection("rear", "DOWN", description)
+            long_pause()
+            IsLineClear("advance", "DOWN", description)
+
+        case "4051":
+            print(f"{uk_datetime} Down train {description} near Lowdham")
+            TrainEnteringSection("advance", "UP", description)
+            SleepThenTOS(20,"rear", "DOWN", description)
+
+        case "4065":
+            print(f"{uk_datetime} Down train {description} near Bleasby")
+            TrainOutOfSection("advance", "DOWN", description)
+
+        case _:
+            if from_berth[0:3] == "400":
+                print(
+                    f"{uk_datetime} Down train {description} leaving Nottingham platform {from_berth[3]}"
+                )
+
+def SleepThenTCclear(delay):
+    print(f"{delay} sec delay before clearing TC")
+    time.sleep(delay)
+    tc4601("CLEAR")
+
+def SleepThenTOS(delay, section, line , description):
+    print(f"{delay} sec delay before TrainOutOfSection")
+    time.sleep(delay)
+    TrainOutOfSection(section, line, description)
 
 def connect_and_subscribe():
     # Connect to feed
@@ -171,7 +195,7 @@ class Listener(stomp.ConnectionListener):
         if headers["destination"].startswith("TRAIN_MVT_"):
             pass
         elif headers["destination"].startswith("TD_"):
-            print_td_frame(parsed_body)
+            handle_td_frame(parsed_body)
 
     def on_error(self, frame):
         print("received an error {}".format(frame.body))
@@ -179,8 +203,7 @@ class Listener(stomp.ConnectionListener):
     def on_disconnected(self):
         print("disconnected")
 
-
-if __name__ == "__main__":
+def main():
     print("Signalling real trains as they pass Lowdham ", __version__)
     # Sample code is here: https://github.com/openraildata/td-trust-example-python3/blob/master/main.py
 
@@ -209,3 +232,6 @@ if __name__ == "__main__":
             break
         except:
             print("Connection failed")
+
+if __name__ == "__main__":
+    main()
