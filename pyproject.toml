@@ -12,7 +12,6 @@ dependencies = [
     "python-dotenv >= 1.0",
     #pywin32 >= 306",
     #paho-mqtt >= 2.0",
-    "pyinstaller >= 6.8",
     "httpx >= 0.28",
     "stomp-py >=8.2",
     "docopt >= 0.6",
