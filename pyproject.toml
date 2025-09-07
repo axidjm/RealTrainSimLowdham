@@ -1,15 +1,15 @@
 [project]
 name = "RealTrainSimLowdham"
-version = "1.0.0"
+version = "1.1.0"
 description = ""
 authors = [{name = "Lowdham Railway Heritage"}]
 requires-python = ">=3.13,<3.14"
 
 dependencies = [
-    "pyinstaller >= 6.11, < 7",
+    "pyinstaller >= 6.15, < 7",
     "pytz >= 2025.1",
     "types-pytz >= 2025.2",
-    "python-dotenv >= 1.0",
+    "python-dotenv >= 1.1",
     #pywin32 >= 306",
     #paho-mqtt >= 2.0",
     "httpx >= 0.28",

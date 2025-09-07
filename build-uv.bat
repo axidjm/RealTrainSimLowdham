@@ -1,4 +1,7 @@
 @echo off
+
+mkdir dist
+
 REM Create virtual environment
 uv venv .venv
 
