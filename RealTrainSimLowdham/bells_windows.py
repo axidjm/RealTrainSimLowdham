@@ -3,7 +3,7 @@ import winsound
 
 # from time import sleep
 
-gap_period = 0.2
+gap_period = 0.5
 
 
 def up_bell():

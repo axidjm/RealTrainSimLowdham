@@ -28,8 +28,8 @@ platform_bell = 15
 normal_standby = 16
 
 # Times
-pause_period = 0.4
-pause2_period = 1.0
+pause_period = 0.6
+pause2_period = 1.2
 long_period = 2.5
 
 pulse_period = 0.15
