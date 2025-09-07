@@ -38,12 +38,14 @@ S_SIGNALLING_REFRESH_FINISHED = "SH"  # Signalling refresh finished
 message_received = False
 connection = None
 
+
 def millisec_to_time(milliseconds):
     # The feed time is in milliseconds, but python takes timestamps in seconds
     timestamp = int(milliseconds / 1000)
     utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone("utc"))
     uk_datetime = utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
     return uk_datetime
+
 
 def handle_td_frame(parsed_body):
     global message_received
