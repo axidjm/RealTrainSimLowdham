@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 
-# Standard
 import json
 import time
-
-# import asyncio
 from datetime import datetime
 from time import sleep
 
-# Third party
 import stomp
 
 # Project
@@ -24,6 +20,7 @@ from pytz import timezone
 
 __version__ = "1.0.0"
 debug = False
+message_queue = []
 
 TIMEZONE_LONDON: timezone = timezone("Europe/London")
 
@@ -41,6 +38,12 @@ S_SIGNALLING_REFRESH_FINISHED = "SH"  # Signalling refresh finished
 message_received = False
 connection = None
 
+def millisec_to_time(milliseconds):
+    # The feed time is in milliseconds, but python takes timestamps in seconds
+    timestamp = int(milliseconds / 1000)
+    utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone("utc"))
+    uk_datetime = utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    return uk_datetime
 
 def handle_td_frame(parsed_body):
     global message_received
@@ -66,22 +69,13 @@ def handle_message(message):
     if area_id != "NM":
         return
 
-    # The feed time is in milliseconds, but python takes timestamps in seconds
-    timestamp = int(int(message["time"]) / 1000)
-    utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone("utc"))
-    # uk_datetime = TIMEZONE_LONDON.fromutc(dt=utc_datetime).strftime("%Y-%m-%d %H:%M:%S")
-    uk_datetime = utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
     # For the sake of demonstration, we're only displaying C-trainClass messages
     if message_type in [C_BERTH_STEP, C_BERTH_CANCEL, C_BERTH_INTERPOSE]:
-        description = message.get("descr", "")
         from_berth = message.get("from", "")
-        to_berth = message.get("to", "")
 
         if from_berth.startswith("40"):
-            handle_nm_message(
-                uk_datetime, message_type, area_id, description, from_berth, to_berth
-            )
+            message_queue.append(message)
+            # handle_nm_message(uk_datetime, message_type, area_id, description, from_berth, to_berth)
 
     # For the sake of demonstration, we're only displaying C-trainClass messages
     # Docs on S-messages is thin to non-existent
@@ -94,12 +88,17 @@ def handle_message(message):
     ]:
         address = message.get("address", "")
         data = message.get("data", "")
-
+        uk_datetime = millisec_to_time(int(message["time"]))
         print(f"{uk_datetime} {message_type} {area_id} {address} {data}")
 
 
-def handle_nm_message(uk_datetime, message_type, area_id, description, from_berth, to_berth):
-    print(f"{uk_datetime} {message_type} {area_id} {description} {from_berth}->{to_berth}")
+def handle_nm_message(message):
+    uk_datetime = millisec_to_time(int(message["time"]))
+    message_type = message["msg_type"]
+    description = message.get("descr", "")
+    from_berth = message.get("from", "")
+    to_berth = message.get("to", "")
+    print(f"{uk_datetime} {message_type} {description} {from_berth}->{to_berth}")
     match from_berth:
         case "4072":
             print(f"{uk_datetime} Up train {description} near Fiskerton")
@@ -118,12 +117,8 @@ def handle_nm_message(uk_datetime, message_type, area_id, description, from_bert
             long_pause()
             TrainOutOfSection("rear", "UP", description)
 
-            delay = 20 if description[0] == "6" else 5
+            delay = 40 if description[0] == "6" else 20
             SleepThenTCclear(delay)
-            # create a coroutine for the blocking function call
-            # coro = asyncio.to_thread(SleepThenTCclear, delay)
-            # execute the call in a new thread independently
-            # task = asyncio.create_task(coro)
 
         case "4042":
             print(f"{uk_datetime} Up train {description} near Burton Joyce")
@@ -145,11 +140,7 @@ def handle_nm_message(uk_datetime, message_type, area_id, description, from_bert
         case "4051":
             print(f"{uk_datetime} Down train {description} near Lowdham")
             TrainEnteringSection("advance", "UP", description)
-            SleepThenTOS(20, "rear", "DOWN", description)
-            # create a coroutine for the blocking function call
-            # coro = asyncio.to_thread(SleepThenTOS,20,"rear", "DOWN", description)
-            # execute the call in a new thread independently
-            # task = asyncio.create_task(coro)
+            SleepThenTOS(35, "rear", "DOWN", description)
 
         case "4065":
             print(f"{uk_datetime} Down train {description} near Bleasby")
@@ -231,7 +222,12 @@ def main():
                 connect_and_subscribe()
 
                 while connection.is_connected():
-                    sleep(1)
+                    if len(message_queue) > 0:
+                        message = message_queue.pop(0)
+                        print(message)
+                        handle_nm_message(message)
+                    sleep(0.1)
+
             except KeyboardInterrupt:
                 print("Keyboard interrupt")
                 raise KeyboardInterrupt
@@ -250,6 +246,4 @@ if __name__ == "__main__":
     )
     connection.set_listener("", Listener(connection))
 
-    # start the asyncio program
-    # asyncio.run(main())
     main()
