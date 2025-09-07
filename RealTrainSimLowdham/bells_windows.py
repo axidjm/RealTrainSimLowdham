@@ -26,6 +26,7 @@ def up_tap():
     winsound.PlaySound("/sigbox/sounds/up-tap.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     time.sleep(gap_period)
 
+
 def down_tap():
     # winsound.Beep(400, 50)
     winsound.PlaySound(None, 0)

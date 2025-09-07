@@ -1,6 +1,6 @@
 import time
 
-from bells_windows import down_tap, up_tap, down_bell, up_bell
+from bells_windows import down_bell, down_tap, up_bell, up_tap
 from block_dingtian import clr_output, pulse_output2, set_output
 
 # Relays

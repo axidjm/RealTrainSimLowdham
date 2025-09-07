@@ -417,7 +417,6 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.14,<2" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.1,<5" },
     { name = "psutil", marker = "extra == 'dev'", specifier = ">=6.1,<7" },
-    { name = "pyinstaller", specifier = ">=6.8" },
     { name = "pyinstaller", specifier = ">=6.11,<7" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "pytz", specifier = ">=2025.1" },
