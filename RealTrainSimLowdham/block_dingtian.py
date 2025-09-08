@@ -4,8 +4,8 @@ import time
 
 import httpx
 
-debug = 1
-relay_board_ip = "192.168.1.102"
+debug = 0
+relay_board_ip = "192.168.2.102"
 
 
 def pulse_output(relay):
