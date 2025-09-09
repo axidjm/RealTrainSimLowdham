@@ -14,9 +14,13 @@ from bells import (
     TrainOutOfSection,
     bells_test,
     long_pause,
+    normal_standby,
     tc4601,
+    trains_test,
 )
+from block_dingtian import clr_output, set_output
 from pytz import timezone
+from stomp.exception import StompException
 
 __version__ = "1.0.0"
 debug = False
@@ -77,7 +81,6 @@ def handle_message(message):
 
         if from_berth.startswith("40"):
             message_queue.append(message)
-            # handle_nm_message(uk_datetime, message_type, area_id, description, from_berth, to_berth)
 
     # For the sake of demonstration, we're only displaying C-trainClass messages
     # Docs on S-messages is thin to non-existent
@@ -95,12 +98,14 @@ def handle_message(message):
 
 
 def handle_nm_message(message):
+    global debug
     uk_datetime = millisec_to_time(int(message["time"]))
     message_type = message["msg_type"]
     description = message.get("descr", "")
     from_berth = message.get("from", "")
     to_berth = message.get("to", "")
-    print(f"{uk_datetime} {message_type} {description} {from_berth}->{to_berth}")
+    if debug:
+        print(f"{uk_datetime} {message_type} {description} {from_berth}->{to_berth}")
     match from_berth:
         case "4072":
             print(f"{uk_datetime} Up train {description} near Fiskerton")
@@ -141,7 +146,7 @@ def handle_nm_message(message):
 
         case "4051":
             print(f"{uk_datetime} Down train {description} near Lowdham")
-            TrainEnteringSection("advance", "UP", description)
+            TrainEnteringSection("advance", "DOWN", description)
             SleepThenTOS(35, "rear", "DOWN", description)
 
         case "4065":
@@ -194,6 +199,7 @@ class Listener(stomp.ConnectionListener):
         self._mq = mq
 
     def on_message(self, frame):
+        set_output(normal_standby)
         headers, message_raw = frame.headers, frame.body
         # print(headers, '\n', message_raw, '\n')
         parsed_body = json.loads(message_raw)
@@ -214,30 +220,39 @@ def main():
     print("Signalling real trains as they pass Lowdham ", __version__)
     # Sample code is here: https://github.com/openraildata/td-trust-example-python3/blob/master/main.py
 
+    # Ctrl-C will abort the test and continue with the next test
     try:
         bells_test()
-        print("End of test")
-
-        while 1:
-            try:
-                sleep(1)
-                connect_and_subscribe()
-
-                while connection.is_connected():
-                    if len(message_queue) > 0:
-                        message = message_queue.pop(0)
-                        print(message)
-                        handle_nm_message(message)
-                    sleep(0.1)
-
-            except KeyboardInterrupt:
-                print("Keyboard interrupt")
-                raise KeyboardInterrupt
-            except:
-                print("Connection failed")
-
     except KeyboardInterrupt:
         print("Keyboard interrupt")
+        clr_output(normal_standby)
+
+    # Ctrl-C will abort the test and continue with the app
+    try:
+        trains_test()
+    except KeyboardInterrupt:
+        print("Keyboard interrupt")
+        clr_output(normal_standby)
+
+    # Second Ctrl-C will abort the app
+    try:
+        while 1:
+            sleep(1)
+            connect_and_subscribe()
+
+            while connection.is_connected():
+                if len(message_queue) > 0:
+                    message = message_queue.pop(0)
+                    print(message)
+                    handle_nm_message(message)
+                sleep(0.1)
+    except KeyboardInterrupt:
+        print("Keyboard interrupt")
+        clr_output(normal_standby)
+        raise KeyboardInterrupt
+
+    except StompException as ex:
+        print(f"Connection failed: {ex}")
 
 
 if __name__ == "__main__":

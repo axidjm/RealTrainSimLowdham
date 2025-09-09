@@ -3,7 +3,9 @@
 mkdir dist
 
 REM Create virtual environment
-uv venv .venv
+rem uv venv .venv
+del build\ /s/y
+rmdir build
 
 REM Install dependencies
 uv sync --extra dev

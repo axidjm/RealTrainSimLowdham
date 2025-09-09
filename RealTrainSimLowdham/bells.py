@@ -45,6 +45,9 @@ def bells_test():
     time.sleep(pause2_period)
     up_bell()
     time.sleep(long_period)
+    up_tap()
+    time.sleep(long_period)
+
     print("Thur Bell")
     down_bell()
     time.sleep(pause_period)
@@ -52,37 +55,67 @@ def bells_test():
     time.sleep(pause2_period)
     down_bell()
     time.sleep(long_period)
+    down_tap()
+    time.sleep(long_period)
 
-    TrainOutOfSection("advance", "UP", "Test advance")
-    TrainOutOfSection("rear", "UP", "Test rear")
 
-    BlockTest("advance", "UP")
-    BlockTest("rear", "UP")
-    BlockTest("advance", "DOWN")
-    BlockTest("rear", "DOWN")
+def all_block_tests():
+    block_test("advance", "UP")
+    block_test("rear", "UP")
+    block_test("advance", "DOWN")
+    block_test("rear", "DOWN")
 
-    pulse_output2(lamp1_out, 1.5, 0.5)
-    pulse_output2(lamp2_out, 1.5, 0.5)
-    pulse_output2(lamp3_out, 1.5, 0.5)
-    pulse_output2(lamp4_out, 1.5, 0.5)
+    print("-------------------------")
+    print("Lamp 1 test")
+    pulse_output2(lamp1_out, 1.5, 1.5)
+    print("Lamp 2 test")
+    pulse_output2(lamp2_out, 1.5, 1.5)
+    print("Lamp 3 test")
+    pulse_output2(lamp3_out, 1.5, 1.5)
+    print("Lamp 4 test")
+    pulse_output2(lamp4_out, 1.5, 1.5)
 
     tc4601("OCCUPIED")
     time.sleep(1.0)
     tc4601("CLEAR")  # Leave TC 'clear'
 
-    pulse_output2(approach_bell, 1.5, 0.5)
-    pulse_output2(platform_bell, 1.5, 0.5)
-    set_output(normal_standby)
+    print("approach bell")
+    pulse_output2(approach_bell, 1.0, 0.5)
+    print("platform bell")
+    pulse_output2(platform_bell, 1.0, 0.5)
+    print("normal")
+    pulse_output2(normal_standby, 1.0, 0.5)
+    print("End of test")
 
 
-def BlockTest(section, line):
+def block_test(section, line):
+    print("-------------------------")
+    print(f"Block test {section} {line}")
     peg(section, line, "LC")
-    time.sleep(1.5)
+    time.sleep(2.5)
     peg(section, line, "TOL")
-    time.sleep(1.5)
+    time.sleep(2.5)
     peg(section, line, "NORMAL")
     print("")
-    time.sleep(0.5)
+    time.sleep(3.5)
+
+
+def trains_test():
+    train_test("rear", "UP", "0A11")
+    train_test("advance", "UP", "0A11")
+    train_test("rear", "DOWN", "2B22")
+    train_test("advance", "DOWN", "2B22")
+
+
+def train_test(section, line, description):
+    print("-------------------------")
+    print(f"Train test: {section} {line} {description}")
+    IsLineClear(section, line, description)
+    time.sleep(5.0)
+    TrainEnteringSection(section, line, description)
+    time.sleep(5.0)
+    TrainOutOfSection(section, line, description)
+    time.sleep(5.0)
 
 
 def IsLineClear(section, line, description):
@@ -109,90 +142,60 @@ def IsLineClear(section, line, description):
     match trainClass:
         case "0":
             print(" ding (2-3)", end="")
-            ding(section, line)
-            ding(section, line)
+            ding2(section, line)
             pause()
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
+            ding3(section, line)
             pause2()
             print(" tap (2-3)")
-            tap(section, line)
-            tap(section, line)
+            tap2(section, line)
             pause()
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
+            tap3(section, line)
 
         case "1":
             print(" ding (4)", end="")
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
+            ding4(section, line)
             pause2()
             print(" tap (4)")
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
+            tap4(section, line)
 
         case "2":
             print(" ding (3-1)", end="")
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
+            ding3(section, line)
             pause()
             ding(section, line)
             pause2()
             print(" tap (3-1)")
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
+            tap3(section, line)
             pause()
             tap(section, line)
 
         case "3":
             print(" ding (3-4-1)", end="")  # RHTT
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
+            ding3(section, line)
             pause()
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
+            ding4(section, line)
             pause()
             ding(section, line)
             pause2()
             print(" tap (3-4-1)")
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
+            tap3(section, line)
             pause()
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
+            tap4(section, line)
             pause()
             tap(section, line)
 
         case "5":
             print(" ding (2-2-1)", end="")
-            ding(section, line)
-            ding(section, line)
+            ding2(section, line)
             pause()
-            ding(section, line)
-            ding(section, line)
+            ding2(section, line)
             pause()
             ding(section, line)
             pause2()
             print(" tap (2-2-1)")
-            tap(section, line)
-            tap(section, line)
+            tap2(section, line)
             pause()
-            tap(section, line)
-            tap(section, line)
+            tap2(section, line)
             pause()
             tap(section, line)
 
@@ -200,18 +203,12 @@ def IsLineClear(section, line, description):
             print(" ding (1-4)", end="")
             ding(section, line)
             pause()
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
-            ding(section, line)
+            ding4(section, line)
             pause2()
             print(" tap (1-4)")
             tap(section, line)
             pause()
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
-            tap(section, line)
+            tap4(section, line)
 
         case _:
             print(f" (unknown class {trainClass})")
@@ -228,11 +225,11 @@ def TrainEnteringSection(section, line, description):
 
     print(f"Train {description} Entering Section (2) on {line} (in {section})")
     ding(section, line)
-    time.sleep(0.2)  # Don't know why the pause in the 'ding()' isn't enough...
+    time.sleep(0.3)  # Don't know why the pause in the 'ding()' isn't enough...
     ding(section, line)
     long_pause()
     tap(section, line)
-    time.sleep(0.2)  # Don't know why the pause in the 'ding()' isn't enough...
+    time.sleep(0.3)  # Don't know why the pause in the 'ding()' isn't enough...
     tap(section, line)
     pause2()
     peg(section, line, "TOL")
@@ -251,13 +248,11 @@ def TrainOutOfSection(section, line, description):
     pause2()
 
     print(f"Train {description} Out Of Section (2-1) on {line} (in {section})")
-    tap(section, line)
-    tap(section, line)
+    tap2(section, line)
     pause()
     tap(section, line)
     pause2()
-    ding(section, line)
-    ding(section, line)
+    ding2(section, line)
     pause()
     ding(section, line)
     pause2()
@@ -281,21 +276,34 @@ def ding(section, line):
             down_tap()
 
 
-def tap(section, line):
-    # section 'rear': Tap the tapper
-    # section 'advance: Ring the bell
+def ding2(section, line):
+    ding(section, line)
+    ding(section, line)
 
-    # Line is UP or DOWN
-    if section == "advance":
-        if line == "UP":
-            up_bell()
-        else:
-            down_bell()
-    else:
-        if line == "UP":
-            up_tap()
-        else:
-            down_tap()
+
+def ding3(section, line):
+    ding2(section, line)
+    ding(section, line)
+
+
+def ding4(section, line):
+    ding2(section, line)
+    ding2(section, line)
+
+
+def tap2(section, line):
+    tap(section, line)
+    tap(section, line)
+
+
+def tap3(section, line):
+    tap2(section, line)
+    tap(section, line)
+
+
+def tap4(section, line):
+    tap2(section, line)
+    tap2(section, line)
 
 
 def pause():
@@ -311,6 +319,23 @@ def pause2():
 def long_pause():
     # Time for signalman to get to the bell, say 3 seconds
     time.sleep(long_period)
+
+
+def tap(section, line):
+    # section 'rear': Tap the tapper
+    # section 'advance: Ring the bell
+
+    # Line is UP or DOWN
+    if section == "advance":
+        if line == "UP":
+            up_bell()
+        else:
+            down_bell()
+    else:
+        if line == "UP":
+            down_tap()
+        else:
+            up_tap()
 
 
 def peg(section, line, state):
@@ -332,14 +357,13 @@ def peg(section, line, state):
             case "DOWN":
                 lc_relay = lh_th_lc
                 tol_relay = lh_th_tol
-
     else:
         print(f"Signalman should peg {state} on {line} (in {section})")
         match line:
-            case "UP":
+            case "DOWN":
                 lc_relay = lh_bj_lc2
                 tol_relay = lh_bj_tol2
-            case "DOWN":
+            case "UP":
                 lc_relay = lh_th_lc2
                 tol_relay = lh_th_tol2
 

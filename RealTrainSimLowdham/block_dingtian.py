@@ -9,10 +9,14 @@ relay_board_ip = "192.168.2.102"
 
 
 def pulse_output(relay):
-    send(f"type=1&relay={relay}&on=1&time=1")
+    if debug:
+        print(f"Pulsing {relay}")
+    send(f"type=1&relay={relay - 1}&on=1&time=1")
 
 
 def pulse_output2(relay, pulse_period, gap_period):
+    if debug:
+        print(f"Pulsing {relay} for {pulse_period} seconds with gap {gap_period} seconds")
     set_output(relay)
     time.sleep(pulse_period)
     clr_output(relay)
@@ -20,11 +24,15 @@ def pulse_output2(relay, pulse_period, gap_period):
 
 
 def set_output(relay):
-    send(f"type=0&relay={relay}&on=1&time=0")
+    if debug:
+        print(f"Setting {relay}")
+    send(f"type=0&relay={relay - 1}&on=1&time=0")
 
 
 def clr_output(relay):
-    send(f"type=0&relay={relay}&on=0&time=0")
+    if debug:
+        print(f"Clearing {relay}")
+    send(f"type=0&relay={relay - 1}&on=0&time=0")
 
 
 def send(args):
