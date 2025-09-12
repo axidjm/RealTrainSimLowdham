@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import sys
 import time
 from datetime import datetime
 from time import sleep
@@ -25,6 +26,8 @@ from stomp.exception import StompException
 __version__ = "1.0.0"
 debug = False
 message_queue = []
+down_line = "DOWN"
+up_line = "UP"
 
 TIMEZONE_LONDON: timezone = timezone("Europe/London")
 
@@ -109,49 +112,49 @@ def handle_nm_message(message):
     match from_berth:
         case "4072":
             print(f"{uk_datetime} Up train {description} near Fiskerton")
-            IsLineClear("rear", "UP", description)
+            IsLineClear("rear", up_line, description)
 
         case "4062":
             print(f"{uk_datetime} Up train {description} near Bleasby")
-            TrainEnteringSection("rear", "UP", description)
+            TrainEnteringSection("rear", up_line, description)
             long_pause()
-            IsLineClear("advance", "UP", description)
+            IsLineClear("advance", up_line, description)
 
         case "4050":
             print(f"{uk_datetime} Up train {description} near Lowdham")
             tc4601("OCCUPIED")
-            TrainEnteringSection("advance", "UP", description)
+            TrainEnteringSection("advance", up_line, description)
             long_pause()
-            TrainOutOfSection("rear", "UP", description)
+            TrainOutOfSection("rear", up_line, description)
 
             delay = 40 if description[0] == "6" else 20
             SleepThenTCclear(delay)
 
         case "4042":
             print(f"{uk_datetime} Up train {description} near Burton Joyce")
-            TrainOutOfSection("advance", "UP", description)
+            TrainOutOfSection("advance", up_line, description)
 
         case "4036":
             print(f"{uk_datetime} Up train {description} near Carlton")
 
         case "4037":
             print(f"{uk_datetime} Down train {description} near Carlton")
-            IsLineClear("rear", "DOWN", description)
+            IsLineClear("rear", down_line, description)
 
         case "4043":
             print(f"{uk_datetime} Down train {description} near Burton Joyce")
-            TrainEnteringSection("rear", "DOWN", description)
+            TrainEnteringSection("rear", down_line, description)
             long_pause()
-            IsLineClear("advance", "DOWN", description)
+            IsLineClear("advance", down_line, description)
 
         case "4051":
             print(f"{uk_datetime} Down train {description} near Lowdham")
-            TrainEnteringSection("advance", "DOWN", description)
-            SleepThenTOS(35, "rear", "DOWN", description)
+            TrainEnteringSection("advance", down_line, description)
+            SleepThenTOS(35, "rear", down_line, description)
 
         case "4065":
             print(f"{uk_datetime} Down train {description} near Bleasby")
-            TrainOutOfSection("advance", "DOWN", description)
+            TrainOutOfSection("advance", down_line, description)
 
         case _:
             if from_berth[0:3] == "400":
@@ -187,7 +190,7 @@ def connect_and_subscribe():
         "ack": "auto",
     }
 
-    # print("Attempting connection")
+    print("Connecting to real-time train messages")
     connection.connect(**connect_headers)
     connection.subscribe(**subscribe_headers)
 
@@ -217,6 +220,8 @@ class Listener(stomp.ConnectionListener):
 
 
 def main():
+    global up_line, down_line
+
     print("Signalling real trains as they pass Lowdham ", __version__)
     # Sample code is here: https://github.com/openraildata/td-trust-example-python3/blob/master/main.py
 
@@ -224,15 +229,19 @@ def main():
     try:
         bells_test()
     except KeyboardInterrupt:
-        print("Keyboard interrupt")
         clr_output(normal_standby)
 
     # Ctrl-C will abort the test and continue with the app
     try:
         trains_test()
     except KeyboardInterrupt:
-        print("Keyboard interrupt")
         clr_output(normal_standby)
+
+    if len(sys.argv) >= 1:
+        if sys.argv[1] == "swap":
+            print("Swapping up and down lines")
+            up_line = "DOWN"
+            down_line = "UP"
 
     # Second Ctrl-C will abort the app
     try:
