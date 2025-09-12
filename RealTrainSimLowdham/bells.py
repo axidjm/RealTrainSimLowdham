@@ -74,6 +74,7 @@ def all_block_tests():
     pulse_output2(lamp3_out, 1.5, 1.5)
     print("Lamp 4 test")
     pulse_output2(lamp4_out, 1.5, 1.5)
+    print("-------------------------")
 
     tc4601("OCCUPIED")
     time.sleep(1.0)
@@ -105,6 +106,7 @@ def trains_test():
     train_test("advance", "UP", "0A11")
     train_test("rear", "DOWN", "2B22")
     train_test("advance", "DOWN", "2B22")
+    print("-------------------------")
 
 
 def train_test(section, line, description):
@@ -116,6 +118,14 @@ def train_test(section, line, description):
     time.sleep(5.0)
     TrainOutOfSection(section, line, description)
     time.sleep(5.0)
+
+
+def CallAttention(section, line):
+    print(f"Call Attention on {line} (in {section})")
+    ding(section, line)
+    long_pause()
+    tap(section, line)
+    pause2()
 
 
 def IsLineClear(section, line, description):
@@ -132,11 +142,9 @@ def IsLineClear(section, line, description):
 
     # Line is UP or DOWN
 
-    print(f"Call Attention on {line} (in {section})")
-    ding(section, line)
-    long_pause()
-    tap(section, line)
+    CallAttention(section, line)
     pause2()
+
     print(f"Is Line Clear for {description} on {line} (in {section})", end="")
 
     match trainClass:
@@ -241,10 +249,7 @@ def TrainOutOfSection(section, line, description):
 
     # Line is UP or DOWN
 
-    print(f"Call Attention on {line} (in {section})")
-    tap(section, line)
-    long_pause()
-    ding(section, line)
+    CallAttention(section, line)
     pause2()
 
     print(f"Train {description} Out Of Section (2-1) on {line} (in {section})")
@@ -255,7 +260,7 @@ def TrainOutOfSection(section, line, description):
     ding2(section, line)
     pause()
     ding(section, line)
-    pause2()
+    pause()
     peg(section, line, "NORMAL")
 
 
@@ -372,8 +377,8 @@ def peg(section, line, state):
             set_output(lc_relay)
             clr_output(tol_relay)
         case "TOL":
-            clr_output(lc_relay)
             set_output(tol_relay)
+            clr_output(lc_relay)
         case "NORMAL":
             clr_output(lc_relay)
             clr_output(tol_relay)
