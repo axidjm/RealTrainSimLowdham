@@ -237,7 +237,7 @@ def main():
     except KeyboardInterrupt:
         clr_output(normal_standby)
 
-    if len(sys.argv) >= 1:
+    if len(sys.argv) >= 2:
         if sys.argv[1] == "swap":
             print("Swapping up and down lines")
             up_line = "DOWN"
