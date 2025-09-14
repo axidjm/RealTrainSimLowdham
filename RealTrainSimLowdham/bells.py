@@ -120,14 +120,6 @@ def train_test(section, line, description):
     time.sleep(5.0)
 
 
-def CallAttention(section, line):
-    print(f"Call Attention on {line} (in {section})")
-    ding(section, line)
-    long_pause()
-    tap(section, line)
-    pause2()
-
-
 def IsLineClear(section, line, description):
     trainClass = description[0]
     # trainClass 0: 2-3
@@ -142,7 +134,10 @@ def IsLineClear(section, line, description):
 
     # Line is UP or DOWN
 
-    CallAttention(section, line)
+    print(f"Call Attention on {line} (in {section})")
+    ding(section, line)
+    long_pause()
+    tap(section, line)
     pause2()
 
     print(f"Is Line Clear for {description} on {line} (in {section})", end="")
@@ -232,13 +227,9 @@ def TrainEnteringSection(section, line, description):
     # Line is UP or DOWN
 
     print(f"Train {description} Entering Section (2) on {line} (in {section})")
-    ding(section, line)
-    time.sleep(0.3)  # Don't know why the pause in the 'ding()' isn't enough...
-    ding(section, line)
+    ding2(section, line)
     long_pause()
-    tap(section, line)
-    time.sleep(0.3)  # Don't know why the pause in the 'ding()' isn't enough...
-    tap(section, line)
+    tap2(section, line)
     pause2()
     peg(section, line, "TOL")
 
@@ -249,7 +240,10 @@ def TrainOutOfSection(section, line, description):
 
     # Line is UP or DOWN
 
-    CallAttention(section, line)
+    print(f"Call Attention on {line} (in {section})")
+    tap(section, line)
+    long_pause()
+    ding(section, line)
     pause2()
 
     print(f"Train {description} Out Of Section (2-1) on {line} (in {section})")
